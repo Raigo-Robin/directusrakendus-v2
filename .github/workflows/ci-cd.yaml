@@ -25,7 +25,7 @@ jobs:
       - name: Tag Docker image
         run: docker tag directus/directus:latest raigorobin/directus-app:${{ github.sha }}
 
-      - name: Push Docker image
+      - name: Push Docker image to Docker Hub
         run: docker push raigorobin/directus-app:${{ github.sha }}
 
       - name: Log in to Azure Container Registry
@@ -36,4 +36,4 @@ jobs:
           password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
 
       - name: Push Docker image to Azure Container Registry
-        run: docker push your-azure-container-registry-url/my-directus-app:${{ github.sha }}
+        run: docker push testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
