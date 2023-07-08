@@ -13,8 +13,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set Directus KEY environment variable
-        run: echo "KEY=${{ secrets.DIRECTUS_KEY }}" >> $GITHUB_ENV
+      - name: Log in to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Pull Directus Docker image
+        run: docker pull directus/directus:latest
+
+      - name: Build and tag Docker image
+        run: |
+          docker build -t raigorobin/my-directus-app:${{ github.sha }} .
+          docker tag raigorobin/my-directus-app:${{ github.sha }} raigorobin/my-directus-app:latest
 
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
@@ -23,11 +34,34 @@ jobs:
           username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
           password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
 
-      - name: Pull Directus Docker image
-        run: docker pull directus/directus:latest
-
-      - name: Tag Docker image
-        run: docker tag directus/directus:latest testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
-
       - name: Push Docker image to Azure Container Registry
-        run: docker push testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
+        run: |
+          docker push testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
+          docker push testregistryraigo.azurecr.io/my-directus-app:latest
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Push Docker image to DockerHub
+        run: |
+          docker push raigorobin/my-directus-app:${{ github.sha }}
+          docker push raigorobin/my-directus-app:latest
+
+      - name: Initialize Directus
+        run: |
+          docker run -d \
+            -p 8080:8080 \
+            -e DATABASE_CLIENT=mysql \
+            -e DATABASE_HOST=database \
+            -e DATABASE_PORT=3306 \
+            -e DATABASE_NAME=directus \
+            -e DATABASE_USER=directus \
+            -e DATABASE_PASSWORD=directus \
+            -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
+            -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
+            -e KEY=${{ secrets.DIRECTUS_KEY }} \
+            --name=directus \
+            directus/directus
