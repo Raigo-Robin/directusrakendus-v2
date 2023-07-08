@@ -22,11 +22,6 @@ jobs:
       - name: Pull Directus Docker image
         run: docker pull directus/directus:latest
 
-      - name: Build and tag Docker image
-        run: |
-          docker build -t raigorobin/my-directus-app:${{ github.sha }} .
-          docker tag raigorobin/my-directus-app:${{ github.sha }} raigorobin/my-directus-app:latest
-
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
         with:
@@ -36,18 +31,16 @@ jobs:
 
       - name: Push Docker image to Azure Container Registry
         run: |
+          docker tag directus/directus:latest testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
           docker push testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
+          docker tag directus/directus:latest testregistryraigo.azurecr.io/my-directus-app:latest
           docker push testregistryraigo.azurecr.io/my-directus-app:latest
-
-      - name: Log in to DockerHub
-        uses: docker/login-action@v1
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Push Docker image to DockerHub
         run: |
+          docker tag directus/directus:latest raigorobin/my-directus-app:${{ github.sha }}
           docker push raigorobin/my-directus-app:${{ github.sha }}
+          docker tag directus/directus:latest raigorobin/my-directus-app:latest
           docker push raigorobin/my-directus-app:latest
 
       - name: Initialize Directus
@@ -62,6 +55,6 @@ jobs:
             -e DATABASE_PASSWORD=directus \
             -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
             -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
-            -e KEY=vTJE6xC6fpf9LT6xGC6D1zMLC96kcu9b \
+            -e KEY=${{ secrets.DIRECTUS_KEY }} \
             --name=directus \
             directus/directus
