@@ -67,6 +67,6 @@ jobs:
             -e DATABASE_PASSWORD=directus \
             -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
             -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
-            -e KEY=${{ secrets.DIRECTUS_KEY }} \
+            -e KEY=vTJE6xC6fpf9LT6xGC6D1zMLC96kcu9b \
             --name=directus \
             directus/directus
