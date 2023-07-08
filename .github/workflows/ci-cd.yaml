@@ -57,16 +57,16 @@ jobs:
 
       - name: Initialize Directus
         run: |
-          docker run -d \
-            -p 8080:8080 \
-            -e DATABASE_CLIENT=mysql \
-            -e DATABASE_HOST=database \
-            -e DATABASE_PORT=3306 \
-            -e DATABASE_NAME=directus \
-            -e DATABASE_USER=directus \
-            -e DATABASE_PASSWORD=directus \
-            -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
-            -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
-            -e KEY=vTJE6xC6fpf9LT6xGC6D1zMLC96kcu9b \
-            --name=directus \
-            directus/directus
+         docker run -d \
+         -p 8080:8080 \
+         -e DATABASE_CLIENT=mysql \
+         -e DATABASE_HOST=database \
+         -e DATABASE_PORT=3306 \
+         -e DATABASE_NAME=directus \
+         -e DATABASE_USER=directus \
+         -e DATABASE_PASSWORD=directus \
+         -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
+         -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
+         -e KEY=vTJE6xC6fpf9LT6xGC6D1zMLC96kcu9b \
+         --name=directus \
+         directus/directus
