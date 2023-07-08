@@ -13,14 +13,21 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Log in to Docker Hub
-        run: docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+      - name: Set Directus KEY environment variable
+        run: echo "KEY=${{ secrets.DIRECTUS_KEY }}" >> $GITHUB_ENV
+
+      - name: Log in to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: testregistryraigo.azurecr.io
+          username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
+          password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
 
       - name: Pull Directus Docker image
         run: docker pull directus/directus:latest
 
       - name: Tag Docker image
-        run: docker tag directus/directus:latest raigorobin/my-directus-app:${{ github.sha }}
+        run: docker tag directus/directus:latest testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
 
-      - name: Push Docker image to Docker Hub
-        run: docker push raigorobin/my-directus-app:${{ github.sha }}
+      - name: Push Docker image to Azure Container Registry
+        run: docker push testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
