@@ -22,17 +22,17 @@ jobs:
       - name: Pull Directus Docker image
         run: docker pull directus/directus:latest
 
+      - name: Build and tag Docker image
+        run: |
+          docker build -t raigorobin/my-directus-app:${{ github.sha }} .
+          docker tag raigorobin/my-directus-app:${{ github.sha }} raigorobin/my-directus-app:latest
+
       - name: Log in to Azure Container Registry
         uses: azure/docker-login@v1
         with:
           login-server: testregistryraigo.azurecr.io
           username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
           password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
-
-      - name: Tag Docker image for Azure Container Registry
-        run: |
-          docker tag directus/directus:latest testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
-          docker tag directus/directus:latest testregistryraigo.azurecr.io/my-directus-app:latest
 
       - name: Push Docker image to Azure Container Registry
         run: |
@@ -45,11 +45,6 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Tag Docker image for DockerHub
-        run: |
-          docker tag directus/directus:latest raigorobin/my-directus-app:${{ github.sha }}
-          docker tag directus/directus:latest raigorobin/my-directus-app:latest
-
       - name: Push Docker image to DockerHub
         run: |
           docker push raigorobin/my-directus-app:${{ github.sha }}
@@ -57,16 +52,16 @@ jobs:
 
       - name: Initialize Directus
         run: |
-         docker run -d \
-         -p 8080:8080 \
-         -e DATABASE_CLIENT=mysql \
-         -e DATABASE_HOST=database \
-         -e DATABASE_PORT=3306 \
-         -e DATABASE_NAME=directus \
-         -e DATABASE_USER=directus \
-         -e DATABASE_PASSWORD=directus \
-         -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
-         -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
-         -e KEY=vTJE6xC6fpf9LT6xGC6D1zMLC96kcu9b \
-         --name=directus \
-         directus/directus
+          docker run -d \
+            -p 8080:8080 \
+            -e DATABASE_CLIENT=mysql \
+            -e DATABASE_HOST=database \
+            -e DATABASE_PORT=3306 \
+            -e DATABASE_NAME=directus \
+            -e DATABASE_USER=directus \
+            -e DATABASE_PASSWORD=directus \
+            -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
+            -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
+            -e KEY=vTJE6xC6fpf9LT6xGC6D1zMLC96kcu9b \
+            --name=directus \
+            directus/directus
