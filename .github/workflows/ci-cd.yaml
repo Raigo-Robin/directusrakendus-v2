@@ -32,10 +32,10 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker image
-        run: docker build -t raigorobin/viimaekatse .
+        run: docker build -t raigorobin/viimanekatse .
 
       - name: Push Docker image
-        run: docker push raigorobin/viimaekatse
+        run: docker push raigorobin/viimanekatse
 
       - name: Deploy to Docker
         uses: azure/docker@v1
