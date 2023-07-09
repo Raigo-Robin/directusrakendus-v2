@@ -28,8 +28,8 @@ jobs:
         uses: azure/docker-login@v1
         with:
           login-server: docker.io
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker image
         run: docker build -t raigorobin/viimaekatse .
@@ -37,13 +37,10 @@ jobs:
       - name: Push Docker image
         run: docker push raigorobin/viimaekatse
 
-      - name: Deploy to Azure Container Instances
-        uses: azure/container-instances-deploy@v1
+      - name: Deploy to Docker
+        uses: azure/docker@v1
         with:
-          resource-group: your-resource-group
-          location: your-location
-          name: your-container-instance-name
           image: raigorobin/viimaekatse
-          registry-login-server: docker.io
-          registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
-          registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          tags: latest
