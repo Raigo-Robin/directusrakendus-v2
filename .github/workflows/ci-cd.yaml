@@ -1,4 +1,4 @@
-name: CI/CD Workflow
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,41 +6,44 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Log in to Azure Container Registry
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Directus
+        run: npm run build
+
+      - name: Set up Docker
         uses: azure/docker-login@v1
         with:
-          login-server: testregistryraigo.azurecr.io
-          username: ${{ secrets.AZURE_REGISTRY_USERNAME }}
-          password: ${{ secrets.AZURE_REGISTRY_PASSWORD }}
+          login-server: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Pull Directus Docker image
-        run: docker pull directus/directus:latest
+      - name: Build Docker image
+        run: docker build -t raigorobin/viimaekatse .
 
-      - name: Tag Docker image
-        run: docker tag directus/directus:latest testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
+      - name: Push Docker image
+        run: docker push raigorobin/viimaekatse
 
-      - name: Push Docker image to Azure Container Registry
-        run: docker push testregistryraigo.azurecr.io/my-directus-app:${{ github.sha }}
-
-      - name: Initialize Directus
-        run: |
-          docker run -d \
-            -p 8080:8080 \
-            -e DATABASE_CLIENT=mysql \
-            -e DATABASE_HOST=database \
-            -e DATABASE_PORT=3306 \
-            -e DATABASE_NAME=directus \
-            -e DATABASE_USER=directus \
-            -e DATABASE_PASSWORD=directus \
-            -e DIRECTUS_ADMIN_EMAIL=admin@example.com \
-            -e DIRECTUS_ADMIN_PASSWORD=4g58D05NAMzU \
-            -e KEY=${{ secrets.DIRECTUS_KEY }} \
-            --name=directus \
-            directus/directus
+      - name: Deploy to Azure Container Instances
+        uses: azure/container-instances-deploy@v1
+        with:
+          resource-group: your-resource-group
+          location: your-location
+          name: your-container-instance-name
+          image: raigorobin/viimaekatse
+          registry-login-server: docker.io
+          registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
