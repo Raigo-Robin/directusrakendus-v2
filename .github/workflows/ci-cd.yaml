@@ -9,26 +9,29 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    services:
+      db:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: mydatabase
+        ports:
+          - 5432:5432
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Directus
-        run: npm run build
 
       - name: Set up Docker
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
           docker pull directus/directus
-          docker build -t raigorobin/viimaekatse .
+          docker build -t raigorobin/viimanekatse .
+
+      - name: Run database migrations
+        run: docker run --network host -v $PWD:/app -w /app directus/directus directus migrate:up
 
       - name: Push Docker image
-        run: docker push raigorobin/viimaekatse
+        run: docker push raigorobin/viimanekatse
