@@ -25,22 +25,10 @@ jobs:
         run: npm run build
 
       - name: Set up Docker
-        uses: azure/docker-login@v1
-        with:
-          login-server: docker.io
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: Build Docker image
-        run: docker build -t raigorobin/viimanekatse .
+        run: |
+          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
+          docker pull directus/directus
+          docker build -t raigorobin/viimaekatse .
 
       - name: Push Docker image
-        run: docker push raigorobin/viimanekatse
-
-      - name: Deploy to Docker
-        uses: azure/docker@v1
-        with:
-          image: raigorobin/viimaekatse
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-          tags: latest
+        run: docker push raigorobin/viimaekatse
