@@ -21,10 +21,10 @@ jobs:
 
       - name: Create and populate environment file
         run: |
-          echo "DATABASE_HOST=raigomysqlserver.mysql.database.azure.com >> .env
-          echo "DATABASE_PORT=3306 >> .env
-          echo "DATABASE_NAME=raigomysqlserver >> .env
-          echo "DATABASE_USER=adminraigo >> .env
+          echo "DATABASE_HOST=raigomysqlserver.mysql.database.azure.com" >> .env
+          echo "DATABASE_PORT=3306" >> .env
+          echo "DATABASE_NAME=raigomysqlserver" >> .env
+          echo "DATABASE_USER=adminraigo" >> .env
           echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
       - name: Run Directus container
