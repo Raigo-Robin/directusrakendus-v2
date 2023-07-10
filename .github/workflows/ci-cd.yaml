@@ -1,4 +1,4 @@
-name: Build and Push Directus Docker Image
+name: Pull and Push Directus Docker Image
 
 on:
   push:
@@ -10,15 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Pull Directus Docker image
+        run: docker pull directus/directus
 
-      - name: Build and Push Docker image
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: raigorobin/viimanekatse:latest
+      - name: Tag and Push Docker image
+        run: |
+          docker tag directus/directus raigorobin/viimanekatse:latest
+          docker push raigorobin/viimanekatse:latest
 
       - name: Open ports 80 and 8055
         run: |
