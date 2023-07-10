@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Build and Push Directus Docker Image
 
 on:
   push:
@@ -10,9 +10,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Docker
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Build and Push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: raigorobin/viimanekatse:latest
+
+      - name: Open ports 80 and 8055
         run: |
-          docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_TOKEN }}
-          docker pull directus/directus
-          docker tag directus/directus raigorobin/viimanekatse
-          docker push raigorobin/viimanekatse
+          sudo ufw allow 80
+          sudo ufw allow 8055
