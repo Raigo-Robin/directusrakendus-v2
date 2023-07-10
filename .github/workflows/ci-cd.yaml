@@ -21,7 +21,7 @@ jobs:
           docker tag directus/directus "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
           docker push "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
 
-      - name: Set up Directus environment variables
+      - name: Create and populate environment file
         run: |
           echo "KEY=${{ secrets.DIRECTUS_KEY }}" >> .env
 
