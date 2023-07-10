@@ -8,28 +8,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pull MariaDB Docker image
-        run: docker pull mariadb:latest
-
-      - name: Set up MariaDB environment variables
-        run: |
-          echo "MYSQL_ROOT_PASSWORD=${{ secrets.MARIADB_ROOT_PASSWORD }}" >> .env
-          echo "MYSQL_DATABASE=${{ secrets.MARIADB_DATABASE }}" >> .env
-          echo "MYSQL_USER=${{ secrets.MARIADB_USER }}" >> .env
-          echo "MYSQL_PASSWORD=${{ secrets.MARIADB_PASSWORD }}" >> .env
-
-      - name: Create Docker network
-        run: docker network create my-network
-
-      - name: Run MariaDB container
-        run: |
-          docker run -d --name mariadb --network my-network \
-            -e MYSQL_ROOT_PASSWORD=${{ secrets.MARIADB_ROOT_PASSWORD }} \
-            -e MYSQL_DATABASE=${{ secrets.MARIADB_DATABASE }} \
-            -e MYSQL_USER=${{ secrets.MARIADB_USER }} \
-            -e MYSQL_PASSWORD=${{ secrets.MARIADB_PASSWORD }} \
-            mariadb:latest
-
       - name: Pull Directus Docker image
         run: docker pull directus/directus
 
@@ -43,12 +21,11 @@ jobs:
 
       - name: Create and populate environment file
         run: |
-          echo "KEY=${{ secrets.DIRECTUS_KEY }}" >> .env
+          echo "DATABASE_HOST=raigomysqlserver.mysql.database.azure.com >> .env
+          echo "DATABASE_PORT=3306 >> .env
+          echo "DATABASE_NAME=raigomysqlserver >> .env
+          echo "DATABASE_USER=adminraigo >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
       - name: Run Directus container
-        run: docker run -d --env-file .env --network my-network -p 80:80 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
-
-      - name: Open ports 80 and 8055
-        run: |
-          sudo ufw allow 80
-          sudo ufw allow 8055
+        run: docker run -d --env-file .env -p 80:80 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
