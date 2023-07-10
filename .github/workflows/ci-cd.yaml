@@ -21,6 +21,13 @@ jobs:
           docker tag directus/directus "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
           docker push "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
 
+      - name: Set up Directus environment variables
+        run: |
+          echo "KEY=${{ secrets.DIRECTUS_KEY }}" >> .env
+
+      - name: Run Directus container
+        run: docker run -d --env-file .env -p 80:80 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+
       - name: Open ports 80 and 8055
         run: |
           sudo ufw allow 80
