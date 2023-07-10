@@ -1,0 +1,23 @@
+name: Database Operations
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  database-operations:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up MySQL client
+        uses: azure/setup-mysql@v1
+        with:
+          server-name: raigoserver.mysql.database.azure
+          server-user: raigoadminserver
+          server-password: ${{ secrets.MYSQL_PASSWORD }}
+          server-host: raigoserver.mysql.database.azure.com
+          server-port: 3306
+
+      - name: Run database script
+        run: |
+          mysql -u ${{ env.MYSQL_USER }} -p${{ secrets.MYSQL_PASSWORD }} -h ${{ env.MYSQL_HOST }} -P ${{ env.MYSQL_PORT }} -D your-database-name -e "your-database-operations"
