@@ -1,3 +1,5 @@
+name: Directus with Sentry
+
 on:
   push:
     branches:
@@ -33,18 +35,20 @@ jobs:
       - name: Configure and run Directus container with Sentry
         run: |
           echo "const Sentry = require('@sentry/node');" >> server.js
-          echo "Sentry.init({dsn: 'https://255cf149c69d405da08760c17416a5e6@o4505507285237760.ingest.sentry.io/4505507292315648', tracesSampleRate: 1.0});" >> server.js
+          echo "Sentry.init({dsn: '${{ secrets.SENTRY_DSN }}', tracesSampleRate: 1.0});" >> server.js
           echo "" >> server.js
-          echo "const transaction = Sentry.startTransaction({op: 'test', name: 'My First Test Transaction'});" >> server.js
+          echo "const app = require('./index');" >> server.js
+          echo "app.use(Sentry.Handlers.requestHandler());" >> server.js
           echo "" >> server.js
-          echo "setTimeout(() => {" >> server.js
-          echo "  try {" >> server.js
-          echo "    foo();" >> server.js
-          echo "  } catch (e) {" >> server.js
-          echo "    Sentry.captureException(e);" >> server.js
-          echo "  } finally {" >> server.js
-          echo "    transaction.finish();" >> server.js
-          echo "  }" >> server.js
-          echo "}, 99);" >> server.js
+          echo "const server = app.listen(80, () => {" >> server.js
+          echo "  console.log('Server running on port 80');" >> server.js
+          echo "});" >> server.js
+          echo "" >> server.js
+          echo "process.on('SIGTERM', () => {" >> server.js
+          echo "  server.close(() => {" >> server.js
+          echo "    console.log('Server terminated');" >> server.js
+          echo "    process.exit(0);" >> server.js
+          echo "  });" >> server.js
+          echo "});" >> server.js
 
           docker run -d --env-file .env -p 80:80 -v $(pwd)/server.js:/usr/src/app/server.js "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
