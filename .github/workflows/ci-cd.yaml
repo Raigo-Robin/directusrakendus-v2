@@ -32,3 +32,11 @@ jobs:
         run: |
           sudo ufw allow 80
           sudo ufw allow 8055
+
+      - name: Create MySQL database
+        run: |
+          mysql -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "CREATE DATABASE directus;"
+
+      - name: Grant privileges to Directus database user
+        run: |
+          mysql -u ${{ secrets.DB_USERNAME }} -p${{ secrets.DB_PASSWORD }} -e "GRANT ALL PRIVILEGES ON directus.* TO 'directus_user'@'localhost' IDENTIFIED BY 'directus_password';"
