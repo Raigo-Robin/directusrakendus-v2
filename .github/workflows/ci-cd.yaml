@@ -27,5 +27,24 @@ jobs:
           echo "DATABASE_USER=adminraigo" >> .env
           echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
-      - name: Run Directus container
-        run: docker run -d --env-file .env -p 80:80 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+      - name: Install Sentry Node SDK
+        run: npm install --save @sentry/node
+
+      - name: Configure and run Directus container with Sentry
+        run: |
+          echo "const Sentry = require('@sentry/node');" >> server.js
+          echo "Sentry.init({dsn: 'YOUR_SENTRY_DSN', tracesSampleRate: 1.0});" >> server.js
+          echo "" >> server.js
+          echo "const transaction = Sentry.startTransaction({op: 'test', name: 'My First Test Transaction'});" >> server.js
+          echo "" >> server.js
+          echo "setTimeout(() => {" >> server.js
+          echo "  try {" >> server.js
+          echo "    foo();" >> server.js
+          echo "  } catch (e) {" >> server.js
+          echo "    Sentry.captureException(e);" >> server.js
+          echo "  } finally {" >> server.js
+          echo "    transaction.finish();" >> server.js
+          echo "  }" >> server.js
+          echo "}, 99);" >> server.js
+
+          docker run -d --env-file .env -p 80:80 -v $(pwd)/server.js:/usr/src/app/server.js "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
