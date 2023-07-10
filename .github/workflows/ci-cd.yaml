@@ -33,7 +33,7 @@ jobs:
       - name: Configure and run Directus container with Sentry
         run: |
           echo "const Sentry = require('@sentry/node');" >> server.js
-          echo "Sentry.init({dsn: 'YOUR_SENTRY_DSN', tracesSampleRate: 1.0});" >> server.js
+          echo "Sentry.init({dsn: "https://255cf149c69d405da08760c17416a5e6@o4505507285237760.ingest.sentry.io/4505507292315648", tracesSampleRate: 1.0});" >> server.js
           echo "" >> server.js
           echo "const transaction = Sentry.startTransaction({op: 'test', name: 'My First Test Transaction'});" >> server.js
           echo "" >> server.js
