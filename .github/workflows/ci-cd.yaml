@@ -14,12 +14,12 @@ jobs:
         run: docker pull directus/directus
 
       - name: Set up Docker Hub credentials
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login --username YOUR_USERNAME --password-stdin
+        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login --username "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Tag and Push Docker image
         run: |
-          docker tag directus/directus raigorobin/viimanekatse:latest
-          docker push raigorobin/viimanekatse:latest
+          docker tag directus/directus "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+          docker push "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
 
       - name: Open ports 80 and 8055
         run: |
