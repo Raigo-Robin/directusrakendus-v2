@@ -21,11 +21,13 @@ jobs:
 
       - name: Create and populate environment file
         run: |
-          echo "DATABASE_HOST=your_mysql_host" >> .env
+          echo "DATABASE_HOST=raigomysqlserver.mysql.database.azure.com" >> .env
           echo "DATABASE_PORT=3306" >> .env
-          echo "DATABASE_NAME=your_mysql_database" >> .env
-          echo "DATABASE_USER=your_mysql_user" >> .env
+          echo "DATABASE_NAME=raigomysqlserver" >> .env
+          echo "DATABASE_USER=adminraigo" >> .env
           echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
 
-      - name: Run Directus container
-        run: docker run -d --env-file .env -p 80:80 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+      - name: Run Directus container with Sentry and open ports
+        run: |
+          docker run -d --env-file .env -p 80:80 -p 9000:9000 -p 9001:9001 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
