@@ -5,5 +5,5 @@ Sentry.init({
   tracesSampleRate: 1.0,
 });
 
-// Your remaining application code goes here
+// Your existing Directus container code here
 // ...
