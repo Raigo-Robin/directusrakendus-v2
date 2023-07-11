@@ -26,8 +26,19 @@ jobs:
           echo "DATABASE_NAME=raigomysqlserver" >> .env
           echo "DATABASE_USER=adminraigo" >> .env
           echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "SENTRY_DSN=${{ secrets.SENTRY_DSN }}" >> .env
 
-      - name: Run Directus container with Sentry and open ports
+      - name: Install Sentry Node SDK
         run: |
-          docker run -d --env-file .env -p 80:80 -p 9000:9000 -p 9001:9001 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+          yarn add @sentry/node
+          # or: npm install --save @sentry/node
+
+      - name: Modify Directus container code
+        run: |
+          echo "const Sentry = require(\"@sentry/node\");" >> index.js
+          echo "Sentry.init({" >> index.js
+          echo '  dsn: "https://255cf149c69d405da08760c17416a5e6@o4505507285237760.ingest.sentry.io/4505507292315648",' >> index.js
+          echo "  tracesSampleRate: 1.0," >> index.js
+          echo "});" >> index.js
+
+      - name: Run Directus container
+        run: docker run -d --env-file .env -p 80:80 -p 9000:9000 -p 9001:9001 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
