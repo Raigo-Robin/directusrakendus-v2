@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS users (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO users (name, email) VALUES ('John Doe', 'john@example.com');
+INSERT INTO users (name, email) VALUES ('Raigo-Robin Anni', 'raigorobin21@gmail.com');
 
-UPDATE users SET email = 'johndoe@example.com' WHERE id = 1;
+UPDATE users SET email = 'raigorobin21@gmail.com' WHERE id = 1;
 
 SELECT * FROM users;
