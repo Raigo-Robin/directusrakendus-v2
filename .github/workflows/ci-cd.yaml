@@ -41,4 +41,4 @@ jobs:
           echo "});" >> index.js
 
       - name: Run Directus container
-        run: docker run -d --env-file .env -p 80:80 -p 9000:9000 -p 9001:9001 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+        run: docker run -d --env-file .env -p 80:80 -p 9000:9000 -p 9001:9001 -p 3306:3306 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
