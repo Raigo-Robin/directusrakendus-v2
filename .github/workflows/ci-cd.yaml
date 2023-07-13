@@ -33,7 +33,7 @@ jobs:
           yarn add @sentry/node
           # or: npm install --save @sentry/node
 
-      - name: Modify Directus container code
+      - name: Modify Sentry code
         run: |
           echo "const Sentry = require(\"@sentry/node\");" >> index.js
           echo "Sentry.init({" >> index.js
