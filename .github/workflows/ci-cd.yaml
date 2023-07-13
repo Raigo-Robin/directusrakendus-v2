@@ -38,6 +38,7 @@ jobs:
           echo "const Sentry = require(\"@sentry/node\");" >> index.js
           echo "Sentry.init({" >> index.js
           echo '  dsn: "https://255cf149c69d405da08760c17416a5e6@o4505507285237760.ingest.sentry.io/4505507292315648",' >> index.js
+          echo '  authToken: ec84b5be1f6a11eea19aaa1161328b59,' >> index.js  # Add your Sentry security token here
           echo "  tracesSampleRate: 1.0," >> index.js
           echo "});" >> index.js
 
