@@ -13,7 +13,9 @@ jobs:
         run: docker pull directus/directus
 
       - name: Set up Docker Hub credentials
-        run: echo "${{ secrets.DOCKER_HUB_TOKEN }}" | docker login --username "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+        run: |
+          echo "${{ secrets.DOCKER_HUB_TOKEN }}" |
+          docker login --username "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
 
       - name: Tag and Push Docker image
         run: |
@@ -29,9 +31,7 @@ jobs:
           echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
 
       - name: Install Sentry Node SDK
-        run: |
-          yarn add @sentry/node
-          # or: npm install --save @sentry/node
+        run: yarn add @sentry/node
 
       - name: Modify Sentry code
         run: |
