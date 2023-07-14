@@ -1,33 +1,36 @@
-// Sentry initialization...
-
+// Sentry 
 const Sentry = require('@sentry/node');
-
 Sentry.init({
-  dsn: process.env.SENTRY_DSN,
-  environment: process.env.NODE_ENV
+  dsn: process.env.SENTRY_DSN
 });
 
-// Rest of app imports...
+// MySQL
+const mysql = require('mysql2/promise');
 
-const express = require('express');
-const app = express();
-
-// Test error route
-app.get('/test', (req, res) => {
-  try {
-    throw new Error('Test error');  
-  } catch (error) {
-    Sentry.captureException(error);
-    res.status(500).send('Test error triggered');
+// Create MySQL connection
+const db = await mysql.createConnection({ 
+  host: process.env.DATABASE_HOST,
+  user: process.env.DATABASE_USER, 
+  password: process.env.DATABASE_PASSWORD,
+  database: process.env.DATABASE_NAME,
+  ssl: {
+    rejectUnauthorized: true
   }
 });
 
-// Existing routes...
+// Test MySQL connection 
+await db.query('SELECT 1');
 
-app.get('/', (req, res) => {
-  res.send('Hello World'); 
-});
+// Directus
+require('./directus')(); 
 
+// Express app
+const app = require('express')();
+
+// Routes... 
+
+// Sentry error handling middleware
+app.use(Sentry.Handlers.errorHandler());
 
 // Start server
 const port = 3000;
