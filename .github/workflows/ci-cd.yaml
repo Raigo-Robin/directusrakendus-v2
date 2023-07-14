@@ -29,6 +29,7 @@ jobs:
           echo "DATABASE_NAME=raigomysqlserver" >> .env
           echo "DATABASE_USER=adminraigo" >> .env
           echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo DATABASE_SSL=true >> .env
 
       - name: Install Sentry Node SDK
         run: yarn add @sentry/node
