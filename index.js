@@ -1,22 +1,31 @@
-const Sentry = require("@sentry/node");
+// Initialize Sentry as early as possible 
+const Sentry = require('@sentry/node');
 
 Sentry.init({
-  dsn: "https://255cf149c69d405da08760c17416a5e6@o4505507285237760.ingest.sentry.io/4505507292315648",
-  tracesSampleRate: 1.0,
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV  
 });
 
+// Rest of app imports...
+const express = require('express');
+const app = express();
 
-const transaction = Sentry.startTransaction({
-  op: "test",
-  name: "My First Test Transaction",
+// Capture unhandled rejections
+process.on('unhandledRejection', error => {
+  Sentry.captureException(error);
 });
 
-setTimeout(() => {
-  try {
-    foo();
-  } catch (e) {
-    Sentry.captureException(e);
-  } finally {
-    transaction.finish();
-  }
-}, 99);
+// API routes...
+app.get('/', (req, res) => {
+  res.send('Hello World');
+});
+
+app.get('/error', (req, res) => {
+  throw new Error('Example error'); 
+});
+
+// Start server
+const port = 3000;
+app.listen(port, () => {
+  console.log(`App listening on port ${port}`)
+});
