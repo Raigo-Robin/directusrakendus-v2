@@ -1,46 +1,56 @@
 name: Directus
+
 on:
-  push:
+  push: 
     branches:
       - main
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Pull Directus Docker image
-        run: docker pull directus/directus
 
-      - name: Set up Docker Hub credentials
-        run: |
-          echo "${{ secrets.DOCKER_HUB_TOKEN }}" |
-          docker login --username "${{ secrets.DOCKER_HUB_USERNAME }}" --password-stdin
+    - name: Pull Directus Docker image  
+      run: docker pull directus/directus
 
-      - name: Tag and Push Docker image
-        run: |
-          docker tag directus/directus "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
-          docker push "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+    - name: Set up Docker Hub credentials
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      - name: Create and populate environment file
-        run: |
-          echo "DATABASE_HOST=raigomysqlserver.mysql.database.azure.com" >> .env
-          echo "DATABASE_PORT=3306" >> .env
-          echo "DATABASE_NAME=raigomysqlserver" >> .env
-          echo "DATABASE_USER=adminraigo" >> .env
-          echo "DATABASE_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo DATABASE_SSL=true >> .env
+    - name: Tag and Push Docker image
+      run: |
+        docker tag directus/directus ${{ secrets.DOCKER_HUB_USERNAME }}/directus:latest
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/directus:latest
 
-      - name: Install Sentry Node SDK
-        run: yarn add @sentry/node
+    - name: Create and populate environment file
+      run: |
+        echo DATABASE_HOST=${{ secrets.MYSQL_HOST }} >> .env
+        echo DATABASE_PORT=3306 >> .env
+        echo DATABASE_NAME=${{ secrets.MYSQL_DB }} >> .env
+        echo DATABASE_USER=${{ secrets.MYSQL_USER }} >> .env
+        echo DATABASE_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
+        echo DATABASE_SSL=true >> .env
 
-      - name: Modify Sentry code
-        run: |
-          echo "const Sentry = require(\"@sentry/node\");" >> index.js
-          echo "Sentry.init({" >> index.js
-          echo '  dsn: "https://255cf149c69d405da08760c17416a5e6@o4505507285237760.ingest.sentry.io/4505507292315648",' >> index.js
-          echo "  tracesSampleRate: 1.0," >> index.js
-          echo "});" >> index.js
+    - name: Install Sentry Node SDK
+      run: yarn add @sentry/node
 
-      - name: Run Directus container
-        run: docker run -d --env-file .env -p 80:80 -p 9000:9000 -p 9001:9001 -p 3306:3306 "${{ secrets.DOCKER_HUB_USERNAME }}/viimanekatse:latest"
+    - name: Configure Sentry
+      run: |
+        echo "require('dotenv').config()" >> index.js
+        echo "const Sentry = require('@sentry/node');" >> index.js
+        echo "Sentry.init({" >> index.js
+        echo "  dsn: '${{ secrets.SENTRY_DSN }}'," >> index.js 
+        echo "});" >> index.js
+        echo "process.on('unhandledRejection', err => {" >> index.js
+        echo "  Sentry.captureException(err);" >> index.js
+        echo "});" >> index.js
+
+    - name: Run Directus container
+      env:
+        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}  
+      run: docker run -d --env-file .env ${{ secrets.DOCKER_HUB_USERNAME }}/directus:latest
