@@ -61,5 +61,6 @@ jobs:
     - name: Run Directus container
       env:
         SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        SENTRY_TOKEN: ${{ secrets.SENTRY_TOKEN }}
       run: |
         docker run -d --env-file .env ${{ secrets.DOCKER_HUB_USERNAME }}/directus:latest /run.sh
