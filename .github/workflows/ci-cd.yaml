@@ -1,9 +1,9 @@
-name: Deploy Directus
+name: Directus 
 
 on:
   push:
     branches:
-      - main  
+      - main
 
 jobs:
 
@@ -13,30 +13,44 @@ jobs:
 
     steps:
 
-    - uses: actions/checkout@v2
-
-    - name: Pull Directus image
+    - name: Pull Directus Docker image  
       run: docker pull directus/directus
 
-    - name: Login to Docker Hub
+    - name: Set up Docker Hub credentials
       uses: docker/login-action@v1
       with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_TOKEN }}
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-    - name: Add entrypoint script
+    - name: Tag and Push Docker image
       run: |
-        echo "#!/bin/sh" > run.sh
-        echo "directus start" >> run.sh
-        echo "node index.js" >> run.sh
+        docker tag directus/directus ${{ secrets.DOCKER_HUB_USERNAME }}/directus:latest
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/directus:latest
 
-    - name: Build and push image
+    - name: Create and populate environment file
       run: |
-        docker build -t ${{ secrets.DOCKER_USER }}/directus:latest .
-        docker push ${{ secrets.DOCKER_USER }}/directus:latest
+        echo DATABASE_HOST=${{ secrets.MYSQL_HOST }} >> .env
+        echo DATABASE_PORT=3306 >> .env
+        echo DATABASE_NAME=${{ secrets.MYSQL_DB }} >> .env
+        echo DATABASE_USER=${{ secrets.MYSQL_USER }} >> .env 
+        echo DATABASE_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
+        echo DATABASE_SSL=true >> .env
 
-    - name: Deploy container
+    - name: Install Sentry Node SDK
+      run: yarn add @sentry/node
+
+    - name: Configure Sentry
+      run: |
+        echo "require('dotenv').config()" >> index.js
+        echo "const Sentry = require('@sentry/node');" >> index.js
+        echo "Sentry.init({" >> index.js 
+        echo "  dsn: '${{ secrets.SENTRY_DSN }}'," >> index.js
+        echo "});" >> index.js
+        echo "process.on('unhandledRejection', err => {" >> index.js
+        echo "  Sentry.captureException(err);" >> index.js
+        echo "});" >> index.js
+
+    - name: Run Directus container
       env:
-        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-      run: | 
-        docker run -d --env-file .env ${{ secrets.DOCKER_USER }}/directus:latest /run.sh
+        SENTRY_DSN: ${{ secrets.SENTRY_DSN }}  
+      run: docker run -d --env-file .env ${{ secrets.DOCKER_HUB_USERNAME }}/directus:latest
